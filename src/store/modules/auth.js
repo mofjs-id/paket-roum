@@ -1,14 +1,27 @@
 import firebase, { auth } from "../../plugins/firebase";
 
 const state = {
-  user: {},
+  user: {
+    uid: null,
+    displayName: null,
+    phoneNumber: null,
+    photoUrl: null
+  },
   phoneNumber: null,
   verificationId: null
 };
 
+const getters = {
+  isLoggedIn: state => !!state.user.uid,
+  isCodeSend: state => !!state.phoneNumber && !!state.verificationId
+};
+
 const mutations = {
   setUser(state, user) {
-    state.user.id = user.id;
+    state.user.uid = user.uid;
+    state.user.displayName = user.displayName;
+    state.user.phoneNumber = user.phoneNumber;
+    state.user.photoUrl = user.photoUrl;
   },
   setPhoneNumber(state, phoneNumber) {
     state.phoneNumber = phoneNumber;
@@ -22,7 +35,7 @@ const actions = {
   sendVerificationCode({ state, commit, dispatch }, captchaVerifier) {
     return dispatch(
       "pendingPromise",
-      auth.signInWithPhoneNumber(state.phoneNumber, captchaVerifier)
+      auth.signInWithPhoneNumber("+62" + state.phoneNumber, captchaVerifier)
     ).then(confirmationResult => {
       commit("setVerificationId", confirmationResult.verificationId);
     });
@@ -36,13 +49,14 @@ const actions = {
       "pendingPromise",
       auth.signInAndRetrieveDataWithCredential(credential)
     ).then(userCredential => {
-      commit("setUser", userCredential);
+      commit("setUser", userCredential.user);
     });
   }
 };
 
 export default {
   state,
+  getters,
   mutations,
   actions
 };
