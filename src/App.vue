@@ -10,16 +10,20 @@
     <v-content>
       <router-view />
     </v-content>
+    <loading-dialog :value="isPending" />
   </v-app>
 </template>
 
 <script>
+import LoadingDialog from "@/components/LoadingDialog.vue";
+
 export default {
   name: "App",
-  data() {
-    return {
-      //
-    };
-  }
+  computed: {
+    isPending() {
+      return this.$store.state.app.isPending;
+    }
+  },
+  components: { LoadingDialog }
 };
 </script>

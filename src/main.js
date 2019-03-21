@@ -3,8 +3,12 @@ import App from "./App.vue";
 import router from "./router";
 import store from "./store";
 import "./plugins/vuetify";
-import "./plugins/firebase";
+import { auth } from "./plugins/firebase";
 import "./registerServiceWorker";
+
+auth.onAuthStateChanged(user => {
+  if (user) store.commit("setUser", user);
+});
 
 Vue.config.productionTip = false;
 
