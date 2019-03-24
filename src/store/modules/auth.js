@@ -5,7 +5,7 @@ const state = {
     uid: null,
     displayName: null,
     phoneNumber: null,
-    photoUrl: null
+    photoURL: null
   },
   phoneNumber: null,
   verificationId: null
@@ -21,7 +21,7 @@ const mutations = {
     state.user.uid = user.uid;
     state.user.displayName = user.displayName;
     state.user.phoneNumber = user.phoneNumber;
-    state.user.photoUrl = user.photoUrl;
+    state.user.photoURL = user.photoURL;
   },
   setPhoneNumber(state, phoneNumber) {
     state.phoneNumber = phoneNumber;
