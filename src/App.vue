@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-toolbar app v-if="$route.meta && $route.meta.showToolbar">
+    <v-toolbar app v-if="$route.meta && $route.meta.requiresAuth">
       <v-toolbar-title class="headline text-uppercase">
         <span>PAKET BIRO UMUM</span>
       </v-toolbar-title>

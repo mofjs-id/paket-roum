@@ -20,43 +20,17 @@
                 </span>
               </v-card-title>
               <v-card-text>
-                <v-form v-if="isCodeSend">
-                  <v-text-field
-                    label="Kode Verifikasi"
-                    outline
-                    v-model="verificationCode"
-                    :rules="[v => (v && v.length === 6) || 'Kode harus diisi']"
-                    mask="# - # - # - # - # - #"
-                  />
-                  <v-btn
-                    block
-                    class="mt-3"
-                    color="primary"
-                    :disabled="isPending"
-                    @click.prevent="signInWithCode"
-                  >
-                    Masuk
-                  </v-btn>
-                </v-form>
-                <v-form v-model="validInput" v-else>
-                  <v-text-field
-                    label="Nomor handphone"
-                    v-model="phoneNumber"
-                    type="tel"
-                    mask="###-####-#####"
-                    :rules="[v => (v && v.length > 9) || 'Nomor tidak lengkap']"
-                    prefix="(+62)"
-                  />
-                  <div id="recaptcha-container"></div>
-                  <v-btn
-                    block
-                    class="mt-3"
-                    :disabled="!validInput || isPending || !captchaSolved"
-                    @click.prevent="sendVerificationCode"
-                  >
-                    Lanjut
-                  </v-btn>
-                </v-form>
+                <form-code
+                  v-if="isCodeSend"
+                  :pending="isPending"
+                  @submit="signInWithCode"
+                />
+                <form-phone
+                  v-else
+                  v-model="phoneNumber"
+                  :pending="isPending"
+                  @submit="sendVerificationCode"
+                />
               </v-card-text>
             </v-card>
           </v-flex>
@@ -67,14 +41,10 @@
 </template>
 
 <script>
-import firebase from "firebase/app";
+import FormPhone from "@/components/LoginFormPhone.vue";
+import FormCode from "@/components/LoginFormCode.vue";
 
 export default {
-  data: () => ({
-    validInput: false,
-    captchaSolved: false,
-    verificationCode: ""
-  }),
   computed: {
     isPending() {
       return this.$store.state.app.isPending;
@@ -92,27 +62,16 @@ export default {
     }
   },
   methods: {
-    sendVerificationCode() {
-      this.$store.dispatch("sendVerificationCode", this.recaptcha);
-      this.captchaSolved = false;
+    sendVerificationCode(recaptcha) {
+      this.$store.dispatch("sendVerificationCode", recaptcha);
     },
-    signInWithCode() {
-      this.$store.dispatch("signInWithCode", this.verificationCode);
+    signInWithCode(code) {
+      this.$store.dispatch("signInWithCode", code);
     }
   },
-  mounted() {
-    this.recaptcha = new firebase.auth.RecaptchaVerifier(
-      "recaptcha-container",
-      {
-        callback: () => {
-          this.captchaSolved = true;
-        },
-        "expired-callback": () => {
-          this.captchaSolved = false;
-        }
-      }
-    );
-    this.recaptcha.render();
+  components: {
+    FormPhone,
+    FormCode
   }
 };
 </script>
