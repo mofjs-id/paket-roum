@@ -1,10 +1,14 @@
 const state = {
-  isPending: false
+  isPending: false,
+  isReady: false
 };
 
 const mutations = {
   setPending(state, isPending) {
     state.isPending = isPending;
+  },
+  setReady(state) {
+    state.isReady = true;
   }
 };
 

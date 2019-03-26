@@ -8,6 +8,7 @@ import "./registerServiceWorker";
 
 auth.onAuthStateChanged(user => {
   if (user) store.commit("setUser", user);
+  if (!store.state.app.isReady) store.commit("setReady");
 });
 
 Vue.config.productionTip = false;
