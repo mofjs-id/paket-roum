@@ -1,4 +1,4 @@
-import firebase, { auth } from "../../plugins/firebase";
+import firebase from "../../plugins/firebase";
 
 const state = {
   user: {
@@ -32,25 +32,26 @@ const mutations = {
 };
 
 const actions = {
-  sendVerificationCode({ state, commit, dispatch }, captchaVerifier) {
-    return dispatch(
-      "pendingPromise",
-      auth.signInWithPhoneNumber("+62" + state.phoneNumber, captchaVerifier)
-    ).then(confirmationResult => {
-      commit("setVerificationId", confirmationResult.verificationId);
-    });
+  sendVerificationCode({ state, commit }, captchaVerifier) {
+    return firebase
+      .auth()
+      .signInWithPhoneNumber("+62" + state.phoneNumber, captchaVerifier)
+      .then(confirmationResult => {
+        commit("setVerificationId", confirmationResult.verificationId);
+      });
   },
-  signInWithCode({ state, commit, dispatch }, code) {
+  signInWithCode({ state, commit }, code) {
     const credential = firebase.auth.PhoneAuthProvider.credential(
       state.verificationId,
       code
     );
-    return dispatch(
-      "pendingPromise",
-      auth.signInAndRetrieveDataWithCredential(credential)
-    ).then(userCredential => {
-      commit("setUser", userCredential.user);
-    });
+    return firebase
+      .auth()
+      .signInAndRetrieveDataWithCredential(credential)
+      .then(userCredential => {
+        commit("setUser", userCredential.user);
+        commit("setVerificationId", null);
+      });
   }
 };
 

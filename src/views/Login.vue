@@ -22,13 +22,13 @@
               <v-card-text>
                 <form-code
                   v-if="isCodeSend"
-                  :pending="isPending"
+                  :phone="phoneNumber"
                   @submit="signInWithCode"
+                  @reset="resetVerificationCode"
                 />
                 <form-phone
                   v-else
                   v-model="phoneNumber"
-                  :pending="isPending"
                   @submit="sendVerificationCode"
                 />
               </v-card-text>
@@ -46,9 +46,6 @@ import FormCode from "@/components/LoginFormCode.vue";
 
 export default {
   computed: {
-    isPending() {
-      return this.$store.state.app.isPending;
-    },
     isCodeSend() {
       return this.$store.getters.isCodeSend;
     },
@@ -62,11 +59,29 @@ export default {
     }
   },
   methods: {
-    sendVerificationCode(recaptcha) {
-      this.$store.dispatch("sendVerificationCode", recaptcha);
+    sendVerificationCode(recaptcha, done) {
+      this.$store
+        .dispatch("sendVerificationCode", recaptcha)
+        .then(() => {
+          done();
+        })
+        .catch(error => {
+          done(error.message);
+        });
     },
-    signInWithCode(code) {
-      this.$store.dispatch("signInWithCode", code);
+    resetVerificationCode() {
+      this.$store.commit("setVerificationId", null);
+    },
+    signInWithCode(code, done) {
+      this.$store
+        .dispatch("signInWithCode", code)
+        .then(() => {
+          done();
+          this.$router.push("/dashboard");
+        })
+        .catch(error => {
+          done(error.message);
+        });
     }
   },
   components: {

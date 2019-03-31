@@ -1,5 +1,5 @@
 <template>
-  <v-form v-model="valid" ref="form">
+  <v-form ref="form" @submit.prevent="onSubmit">
     <v-text-field
       label="Nomor handphone"
       :value="value"
@@ -9,13 +9,24 @@
       :rules="rules"
       prefix="(+62)"
       :disabled="pending"
+      :loading="pending"
     />
     <v-input
-      :error-messages="captchaSolved ? [] : 'Captcha belum diselesaikan.'"
+      :rules="[v => captchaSolved || 'Captcha belum diselesaikan.']"
+      class="mt-3"
     >
       <div id="recaptcha-container"></div>
     </v-input>
-    <v-btn block class="mt-3" :disabled="pending" @click.prevent="onSubmit">
+    <v-alert color="error" icon="warning" :value="errorMessage">
+      {{ errorMessage }}
+    </v-alert>
+    <v-btn
+      block
+      class="mt-3"
+      :disabled="pending"
+      :loading="pending"
+      type="submit"
+    >
       Lanjut
     </v-btn>
   </v-form>
@@ -26,22 +37,27 @@ import firebase from "firebase/app";
 
 export default {
   data: () => ({
-    valid: false,
     rules: [
-      v => !!v || "Nomor harus diisi",
-      v => (v && v.length > 9) || "Nomor tidak lengkap"
+      v => !!v || "Nomor harus diisi.",
+      v => (v && v.length > 9) || "Nomor tidak lengkap."
     ],
-    captchaSolved: false
+    captchaSolved: false,
+    pending: false,
+    errorMessage: ""
   }),
   props: {
-    value: String,
-    pending: Boolean
+    value: String
   },
   methods: {
     onSubmit() {
-      if (this.$refs.form.validate() && this.captchaSolved) {
-        this.$emit("submit", this.recaptcha);
+      if (this.$refs.form.validate()) {
+        this.pending = true;
         this.captchaSolved = false;
+        this.errorMessage = "";
+        this.$emit("submit", this.recaptcha, message => {
+          if (message) this.errorMessage = message;
+          this.pending = false;
+        });
       }
     }
   },
@@ -51,6 +67,7 @@ export default {
       {
         callback: () => {
           this.captchaSolved = true;
+          this.$refs.form.validate();
         },
         "expired-callback": () => {
           this.captchaSolved = false;
